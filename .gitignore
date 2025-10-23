@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.env
+*.sqlite3
+.idea/
+# Visual Studio (für dev-win)
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.vs/
+
