@@ -7,6 +7,6 @@ class ProjectCreate(ProjectBase):
     pass
 class ProjectOut(ProjectBase):
     id: int
-    owner_id: int
+    owner_id: int | None = None
     class Config:
-        orm_mode = True
+        from_attributes = True

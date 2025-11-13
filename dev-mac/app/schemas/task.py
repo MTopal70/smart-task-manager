@@ -16,4 +16,4 @@ class TaskOut(TaskBase):
     owner_id: int
     project_id: Optional[int]
     class Config:
-        orm_mode = True
+        from_attributes = True

@@ -1,8 +1,18 @@
 __pycache__/
 *.pyc
-.env
+dev-mac/app/.env
 *.sqlite3
 .idea/
+.vscode/
+
+# Environment variables
+.env
+
+# Virtual Environment
+.venv/
+venv/
+*.venv/
+
 # Visual Studio (für dev-win)
 *.suo
 *.user
