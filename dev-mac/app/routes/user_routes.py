@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
-from app.schemas.user import UserCreate, UserOut
-from app.security import hash_password # <-- Importieren unserer Hashing-Funktion
+from app.schemas.user import UserCreate, UserOut, UserLogin, Token
+from app.security import hash_password, verify_password, create_access_token # <-- Importieren unserer Hashing-Funktion
 
 # Wir erstellen einen neuen Router
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -47,3 +48,35 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
 
     return new_user
+
+@router.post("/login", response_model=Token)
+def login(
+        user_credentials: OAuth2PasswordRequestForm = Depends(),
+        db: Session = Depends(get_db)
+):
+    """
+    Prüft Email & Passwort und gibt ein JWT Token zürück
+    :param user_credentials:
+    :param db:
+    :return:
+    """
+    # 1. User in der DB suchen (per Email)
+    user = db.query(User).filter(User.email == user_credentials.username).first()
+    # 2. Prüfen : Gibt es den User und stimmt das Passwort ?
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User not found"
+        )
+    if not verify_password(user_credentials.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Incorrect password"
+        )
+
+    # 3. Erstelle ein JWT Token
+    # Wir speichern die User-ID im Token (als 'sub' = subject
+    access_token = create_access_token(data={"sub": str(user.id)})
+
+    return {"access_token": access_token, "token_type": "bearer"}
+
